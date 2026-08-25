@@ -15,6 +15,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # create-pull-request configures its own AUTHORIZATION header
+          # from `token` below — leaving checkout's persisted credential in
+          # place too sends two Authorization headers on the same request,
+          # which GitHub rejects with "Duplicate header: Authorization"
+          # (400) as soon as create-pull-request touches git.
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v7
