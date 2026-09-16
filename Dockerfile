@@ -43,12 +43,20 @@ RUN pnpm ui:install && pnpm ui:build
 FROM node:22-bookworm
 ENV NODE_ENV=production
 
+# chromium: `openclaw browser start` requires a system Chrome/Brave/Edge/
+# Chromium binary — it does not bundle or auto-download one (unlike
+# Playwright's own install step). Without this, `openclaw browser status`
+# reports running:false/browser:unknown and every capability that needs
+# real web access (research, signal scanning, measurement checks) fails.
+# Debian's `chromium` package pulls in its own required runtime libraries
+# (NSS, GTK, etc.) as hard Depends, so no extra libs are needed here.
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     tini \
     python3 \
     python3-venv \
+    chromium \
   && rm -rf /var/lib/apt/lists/*
 
 # `openclaw update` expects pnpm. Provide it in the runtime image.
